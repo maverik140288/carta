@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carta para ti</title>
+  <style>
+    :root{
+      --bg1:#0b0b18;
+      --bg2:#1b0f2e;
+      --bg3:#2a1236;
+      --card: rgba(255,255,255,.08);
+      --txt: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --accent: rgba(255,120,180,.95);
+      --accent2: rgba(160,120,255,.95);
+      --shadow: 0 18px 55px rgba(0,0,0,.45);
+      --radius: 22px;
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color: var(--txt);
+      background: radial-gradient(1200px 800px at 20% 20%, rgba(255,120,180,.18), transparent 55%),
+                  radial-gradient(900px 700px at 80% 30%, rgba(160,120,255,.15), transparent 60%),
+                  linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow:hidden;
+    }
+
+    .glow{
+      position: fixed; inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,120,180,.12), transparent 45%),
+                  radial-gradient(circle at 70% 60%, rgba(160,120,255,.10), transparent 50%);
+      filter: blur(40px);
+      animation: drift 10s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes drift{
+      from{ transform: translate(-2%, -1%) scale(1.02); }
+      to  { transform: translate( 2%,  1%) scale(1.05); }
+    }
+
+    .stars, .stars2{
+      position: fixed; inset:0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.55) 1px, transparent 1px),
+        radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.45) 1px, transparent 1px),
+        radial-gradient(1px 1px at 55% 25%, rgba(255,255,255,.35) 1px, transparent 1px),
+        radial-gradient(1px 1px at 75% 55%, rgba(255,255,255,.40) 1px, transparent 1px),
+        radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,.30) 1px, transparent 1px);
+      opacity:.6;
+      pointer-events:none;
+    }
+    .stars2{
+      opacity:.35;
+      transform: scale(1.2);
+      animation: starFloat 14s linear infinite;
+    }
+    @keyframes starFloat{
+      from{ transform: translateY(0) scale(1.2); }
+      to{ transform: translateY(-40px) scale(1.2); }
+    }
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+      position: relative;
+      z-index: 2;
+    }
+    .card{
+      width: min(520px, 100%);
+      background: linear-gradient(180deg, var(--card), rgba(255,255,255,.05));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header{
+      padding: 18px 18px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(90deg, rgba(255,120,180,.10), rgba(160,120,255,.08));
+    }
+    .title{ display:flex; flex-direction:column; gap:4px; }
+    .title h1{ font-size: 18px; margin:0; letter-spacing: .2px; }
+    .title p{ margin:0; font-size: 13px; color: var(--muted); }
+
+    .chip{
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.9);
+    }
+
+    .body{ padding: 18px; }
+    .screen{
+      display:none;
+      animation: fadeUp .45s ease both;
+    }
+    .screen.active{ display:block; }
+    @keyframes fadeUp{
+      from{ opacity:0; transform: translateY(8px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    .big{
+      font-size: 22px;
+      line-height: 1.25;
+      margin: 0 0 10px;
+      letter-spacing:.2px;
+    }
+
+    .text{
+      font-size: 15px;
+      line-height: 1.6;
+      color: rgba(255,255,255,.88);
+      margin: 0;
+      white-space: pre-wrap;
+
+      text-align: justify;
+      text-justify: inter-word;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+    }
+
+    .typebox{
+      padding: 14px 14px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .actions{
+      display:flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .nav-actions{
+      flex-direction: row-reverse;     /* Volver a la derecha */
+      justify-content: space-between;
+    }
+
+    button{
+      appearance:none;
+      border:0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 650;
+      cursor:pointer;
+      transition: transform .08s ease, filter .15s ease;
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    button:active{ transform: scale(.98); }
+    button.primary{
+      background: linear-gradient(90deg, rgba(255,120,180,.85), rgba(160,120,255,.80));
+      border: 1px solid rgba(255,255,255,.20);
+      filter: drop-shadow(0 10px 22px rgba(255,120,180,.18));
+    }
+    button.ghost{ background: rgba(0,0,0,.18); }
+
+    .footer{
+      padding: 14px 18px 18px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.18));
+    }
+    .progress{ display:flex; gap:6px; align-items:center; }
+    .dot{
+      width: 7px; height:7px; border-radius:999px;
+      background: rgba(255,255,255,.25);
+    }
+    .dot.on{ background: rgba(255,255,255,.85); }
+
+    .hearts{
+      position: fixed; inset:0;
+      pointer-events:none;
+      z-index: 1;
+      overflow:hidden;
+    }
+    .heart{
+      position:absolute;
+      font-size: 18px;
+      opacity: .0;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+      animation: floatUp linear forwards;
+    }
+    @keyframes floatUp{
+      0%   { transform: translateY(20px) scale(.95); opacity: 0; }
+      10%  { opacity: .85; }
+      80%  { opacity: .55; }
+      100% { transform: translateY(-120vh) scale(1.15); opacity: 0; }
+    }
+
+    /* Reveal (sin tecleo) */
+    .revealText{
+      opacity: 0;
+      transform: translateY(10px);
+      filter: blur(2px);
+      clip-path: inset(0 0 100% 0 round 8px);
+      transition:
+        opacity 850ms ease,
+        transform 850ms ease,
+        filter 850ms ease,
+        clip-path 1100ms cubic-bezier(.2,.9,.2,1);
+      will-change: opacity, transform, filter, clip-path;
+    }
+    .revealText.on{
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+      clip-path: inset(0 0 0 0 round 8px);
+    }
+
+    .hint{
+      margin-top:10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.65);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="glow"></div>
+  <div class="stars"></div>
+  <div class="stars2"></div>
+  <div class="hearts" id="hearts"></div>
+
+  <main class="wrap">
+    <section class="card" role="article" aria-label="Carta romántica interactiva">
+      <div class="header">
+        <div class="title">
+          <h1 id="cardTitle">Para ti ✨</h1>
+          <p id="cardSub">De : Erik - EPBM</p>
+        </div>
+        <div class="chip" id="chip">🤍</div>
+      </div>
+
+      <div class="body">
+        <!-- Pantalla 1 -->
+        <div class="screen active" id="s1">
+          <p class="big">Hola…</p>
+          <p class="text">Redacté esto luego de pensarlo bien, es un resumen sincero de lo que siento, escrito desde la calma y la reflexión. Léelo cuando quieras, a tu tiempo. No necesitas responder, solo leer.</p>
+          <div class="actions">
+            <button class="primary" onclick="next()">Empezar</button>
+            <button class="ghost" type="button"
+              onclick="window.open('https://www.youtube.com/watch?v=eFWUnHJWwCg&list=RDOlUivmkCYvk&index=5','_blank','noopener,noreferrer')">
+              🎧 Escuchar canción
+            </button>
+          </div>
+          <div class="hint">🎧 Recomendación: si quieres, pon esta canción y léelo mientras suena.</div>
+        </div>
+
+        <!-- Pantalla 2 -->
+        <div class="screen" id="s2">
+          <div class="typebox">
+            <p class="text revealText" id="typeText"></p>
+          </div>
+          <div class="actions nav-actions">
+            <button class="ghost" onclick="prev()">Volver</button>
+            <button class="primary" onclick="next()">Continuar</button>
+          </div>
+        </div>
+
+        <!-- Pantalla 3 -->
+        <div class="screen" id="s3">
+          <div class="typebox">
+            <p class="text revealText">Duele sentirse una opción cuando uno estaba dispuesto a ser un hogar.
+Duele no ser tu elección, sentir el rechazo, darse cuenta de que uno nunca fue prioridad.
+Duele ser la última opción, esperar con ilusión mientras el corazón se llena de dudas.
+Duele amar con todo y aprender a contenerse para no incomodar, para no pedir más de lo que el otro puede dar.              
+Duele pensar de más, imaginar escenarios, hacerse preguntas que nunca tuvieron respuestas claras.
+Duelen las mentiras, las medias verdades y las cosas que se callaron.
+Y duele quedarse en silencio para no perder a alguien, hasta que un día uno entiende que, en ese silencio, empezó a perderse a sí mismo.
+           </p>
+          </div>
+          <div class="actions nav-actions">
+            <button class="ghost" onclick="prev()">Volver</button>
+            <button class="primary" onclick="next()">Continuar</button>
+          </div>
+        </div>
+
+        <!-- Pantalla 4 -->
+        <div class="screen" id="s4">
+          <div class="typebox">
+            <p class="text revealText">No me voy porque no te ame.Me voy porque quedarme así me hace sentir pequeño, inseguro, dudando de mi valor. Y no quiero amar desde la carencia ni desde la espera eterna. Merecemos algo que no duela tanto.
+
+También quiero pedirte perdón. Reconozco que tuve comportamientos inadecuados, reacciones que no fueron las correctas. Muchas nacieron desde la ansiedad, desde el miedo a perderte, no desde la intención de hacerte daño… pero eso no las justifica. Lamentablemente, en algunos momentos nos faltamos el respeto, y de eso me hago responsable.
+            </p>
+          </div>
+          <div class="actions nav-actions">
+            <button class="ghost" onclick="prev()">Volver</button>
+            <button class="primary" onclick="next()">Continuar</button>
+          </div>
+        </div>
+
+        <!-- Pantalla 5 -->
+        <div class="screen" id="s5">
+          <div class="typebox">
+            <p class="text revealText">Quiero que sepas que me cuesta irme. No es una decisión fácil ni tomada a la ligera. Irse duele, cambiar duele, pero también entiendo que los cambios, aunque duelan, son parte inevitable de la vida y del crecimiento.
+
+Aun así, no hay rencor en mí. Solo cansancio emocional y una tristeza serena. Me llevo los momentos simples y también los más intensos: las conversaciones que importaron, las risas que fueron refugio, las noches bonitas en las que nos quedamos conociéndonos, ilusionándonos, bebiendo, sonriendo sin pensar en el mañana, dejándonos llevar, enamorándonos poco a poco. Me llevo incluso aquellas noches en las que amar dolió más de lo que debería. Todo eso fue real, y por eso duele despedirse.
+            </p>
+          </div>
+          <div class="actions nav-actions">
+            <button class="ghost" onclick="prev()">Volver</button>
+            <button class="primary" onclick="next()">Continuar</button>
+          </div>
+        </div>
+
+        <!-- Pantalla 6 -->
+        <div class="screen" id="s6">
+          <div class="typebox">
+            <p class="text revealText">Quiero que sepas algo más, y lo digo con calma y verdad: siempre voy a amarte de alguna forma. No como una promesa que ata, sino como un sentimiento que ya existe y que no se borra. Te llevaste un pedazo de mi corazón que no va a volver jamás, y estoy en paz con eso, porque fue un pedazo que te entregué de verdad.
+
+No quiero ser un peso, una duda constante, ni alguien que espera más de lo que puede recibir. Mereces tranquilidad, y yo también. A veces amar también es saber retirarse a tiempo, incluso cuando el corazón no está listo.              
+            </p>
+          </div>
+          <div class="actions nav-actions">
+            <button class="ghost" onclick="prev()">Volver</button>
+            <button class="primary" onclick="next()">Continuar</button>
+          </div>
+        </div>
+
+        <!-- Pantalla 7 -->
+        <div class="screen" id="s7">
+          <div class="typebox">
+            <p class="text revealText">De corazón, deseo que te vaya bien. Que cumplas tus sueños, que alcances tus metas, que encuentres tranquilidad y sonrisas genuinas. Ojalá la vida te rodee de personas que te sumen, de momentos que te hagan crecer y de amor en la forma que tú necesites.
+
+Y si existe otra vida, otro tiempo o un lugar donde las cosas no duelan tanto, ojalá ahí sí pueda ser tu elección. Ojalá ahí sí sea el amor de tu vida, el que llegaba en el momento correcto, sin dudas ni silencios. Aquí no se pudo… pero el sentimiento fue real.              
+            </p>
+          </div>
+          <div class="actions nav-actions">
+            <button class="ghost" onclick="prev()">Volver</button>
+            <button class="primary" onclick="next()">Continuar</button>
+          </div>
+        </div>
+
+        <!-- Pantalla 8 -->
+        <div class="screen" id="s8">
+          <div class="typebox">
+            <p class="text revealText">Yo también intentaré sanar, aprender y seguir adelante. No te deseo ausencia, te deseo paz. Y aunque una parte de mí hubiera querido que esto fuera distinto, entiendo que no siempre el amor basta cuando no camina en la misma dirección.
+
+Gracias por lo que fue.
+Perdón por lo que no supe manejar mejor.
+Y adiós… no desde la ausencia del amor, sino desde el respeto por él.
+
+Cuídate mucho.
+Me despido con cariño, con verdad… y con el deseo sincero de que seas feliz, incluso si ya no es conmigo.
+            </p>
+          </div>
+          <div class="actions nav-actions">
+            <button class="ghost" onclick="prev()">Volver</button>
+            <button class="primary" onclick="burst()">🤍 Final</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer">
+        <div class="progress" aria-label="Progreso">
+          <span class="dot on" id="d1"></span>
+          <span class="dot" id="d2"></span>
+          <span class="dot" id="d3"></span>
+          <span class="dot" id="d4"></span>
+          <span class="dot" id="d5"></span>
+          <span class="dot" id="d6"></span>
+          <span class="dot" id="d7"></span>
+          <span class="dot" id="d8"></span>
+        </div>
+        <div id="counter">1 / 8</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const NOMBRE = "Magdyel";
+
+    const TYPEWRITER_TEXT =
+`No escribo esta carta porque haya dejado de amarte.La escribo porque amarte así me ha ido apagando poco a poco.
+
+Durante mucho tiempo intenté convencerme de que lo que sentía era exageración mía, que quizá estaba pidiendo demasiado, que debía conformarme con menos de lo que mi corazón necesitaba. Pero la verdad es que muchas veces me sentí rechazado, invisible, como si estuviera presente pero no del todo elegido.
+
+Hubo momentos en los que quise acercarme y sentí distancia. Momentos en los que necesité palabras, gestos, claridad… y encontré silencios. No porque quisieras herirme, lo sé, sino porque simplemente no estábamos en el mismo lugar emocional. Y eso duele más que cualquier rechazo directo.`;
+
+    const screens = ["s1","s2","s3","s4","s5","s6","s7","s8"].map(id => document.getElementById(id));
+    let idx = 0;
+
+    const dots = ["d1","d2","d3","d4","d5","d6","d7","d8"].map(x => document.getElementById(x));
+    const counter = document.getElementById("counter");
+
+    document.getElementById("cardTitle").textContent = `Para ${NOMBRE} ✨`;
+
+    function animateRevealInCurrent(){
+      const el = screens[idx].querySelector(".revealText");
+      if(!el) return;
+      el.classList.remove("on");
+      void el.offsetWidth;
+      setTimeout(() => el.classList.add("on"), 60);
+    }
+
+    const typeEl = document.getElementById("typeText");
+    function startReveal(){
+      typeEl.textContent = TYPEWRITER_TEXT;
+      animateRevealInCurrent();
+    }
+
+    function show(i){
+      idx = Math.max(0, Math.min(screens.length-1, i));
+      screens.forEach((s, k) => s.classList.toggle("active", k === idx));
+      dots.forEach((d, k) => d.classList.toggle("on", k === idx));
+      counter.textContent = `${idx+1} / ${screens.length}`;
+
+      if(idx === 1) startReveal();
+      else animateRevealInCurrent();
+    }
+    function next(){ show(idx+1); }
+    function prev(){ show(idx-1); }
+
+    const hearts = document.getElementById("hearts");
+    const HEARTS = ["🍂","🍁","🍃","✦","✧","·","💔","🥀","🌧️","❄️"];
+
+    function spawnHeart(burst=false){
+      const el = document.createElement("div");
+      el.className = "heart";
+      el.textContent = HEARTS[Math.floor(Math.random()*HEARTS.length)];
+      const left = Math.random() * 100;
+      const size = 14 + Math.random()*18;
+      const duration = burst ? (2.8 + Math.random()*1.8) : (7 + Math.random()*5);
+
+      el.style.left = left + "vw";
+      el.style.bottom = (-10 - Math.random()*20) + "px";
+      el.style.fontSize = size + "px";
+      el.style.animationDuration = duration + "s";
+
+      hearts.appendChild(el);
+      setTimeout(() => el.remove(), (duration+0.5)*1000);
+    }
+
+    setInterval(() => spawnHeart(false), 650);
+
+    function burst(){
+      for(let i=0;i<28;i++){
+        setTimeout(() => spawnHeart(true), i*55);
+      }
+      const chip = document.getElementById("chip");
+      chip.textContent = "🤍";
+      chip.style.borderColor = "rgba(255,255,255,.28)";
+    }
+
+    show(0);
+  </script>
+</body>
+</html>
